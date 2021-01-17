@@ -11,17 +11,32 @@ class App extends Component {
   removeCharacter = index => {
     const { characters } = this.state
   
-    this.setState({
-      characters: characters.filter((character, i) => {
-        return i !== index
-      }),
+    this.makeDeleteCall(characters[index].id).then( response => {
+      if (response != null && response.status === 200)
+        this.setState({
+          characters: characters.filter((character, i) => {
+            return i !== index
+          }),
+      })
     })
   }
 
+  makeDeleteCall(id){
+    return axios.delete(`http://localhost:5000/users/${id}`)
+     .then(function (response) {
+       console.log(response);
+       return response;
+     })
+     .catch(function (error){
+       console.log(error);
+       return null;
+     })
+  }
+
   handleSubmit = character => {
-    this.makePostCall(character).then( callResult => {
-       if (callResult === true) {
-          this.setState({ characters: [...this.state.characters, character] });
+    this.makePostCall(character).then( response => {
+       if (response != null && response.status === 201) {
+          this.setState({ characters: [...this.state.characters, response.data] });
        }
     });
   }
@@ -30,11 +45,11 @@ class App extends Component {
     return axios.post('http://localhost:5000/users', character)
      .then(function (response) {
        console.log(response);
-       return (response.status === 200);
+       return response;
      })
      .catch(function (error) {
        console.log(error);
-       return false;
+       return null;
      });
   }
 
